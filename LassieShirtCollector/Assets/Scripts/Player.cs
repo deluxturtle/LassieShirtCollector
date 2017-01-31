@@ -1,14 +1,26 @@
 ﻿using UnityEngine;
 using System.Collections;
 
+enum AnimName
+{
+    Idle,
+    WalkRight,
+    WalkLeft
+}
+
+/// <summary>
+/// Author: Andrew Seba
+/// Description: Controls the player movement.
+/// </summary>
 public class Player : MonoBehaviour {
 
-    public GameObject offScreenObj;
-    private Vector2 swipeStartPos;
+    private string animParameter = "animNum";
+    private Animator animator;
     private Vector2 swipeCurPos;
+    private Vector2 middleScreenPos = new Vector2(0.5f, 0.5f);
     // Use this for initialization
     void Start () {
-	
+        animator = GetComponentInChildren<Animator>();
 	}
 	
 	// Update is called once per frame
@@ -16,21 +28,22 @@ public class Player : MonoBehaviour {
         if(Input.touchCount == 1)
         {
             Touch touch = Input.GetTouch(0);
-            if(touch.phase == TouchPhase.Began)
-            {
-                swipeStartPos = touch.position;
-                Debug.Log("Began: " + swipeStartPos);
-            }
-            if(touch.phase == TouchPhase.Moved)
+            if(touch.phase == TouchPhase.Began || touch.phase == TouchPhase.Moved || touch.phase == TouchPhase.Stationary)
             {
                 swipeCurPos = touch.position;
-                Vector3 worldTouchPos = Camera.main.ScreenToWorldPoint(swipeCurPos);
-                transform.position = new Vector3(worldTouchPos.x, worldTouchPos.y, 0);
-                Debug.Log("Moved: " + swipeCurPos);
+                if(Camera.main.ScreenToViewportPoint(swipeCurPos).x < middleScreenPos.x)
+                {
+                    animator.SetInteger(animParameter, (int)AnimName.WalkLeft);
+                }
+                else
+                {
+                    animator.SetInteger(animParameter, (int)AnimName.WalkRight);
+
+                }
             }
-            if(touch.phase == TouchPhase.Ended)
+            else
             {
-                transform.position = offScreenObj.transform.position;
+                animator.SetInteger(animParameter, (int)AnimName.Idle);
             }
         }
 
